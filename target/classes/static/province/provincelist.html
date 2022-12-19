@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        table{
+            width: 100%;
+            margin-bottom: 15px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th,td{
+            border: 1px solid #CBD6DE;
+            padding-left: 10px;
+            line-height: 28px;
+        }
+        th{
+            text-align: left;
+            background: linear-gradient(#edf2f5,#dce9f2,#edf2f5);
+            color:#467aa7;
+        }
+        tbody tr:nth-child(even){
+            background: #f2f2f2;
+        }
+        #pages{
+            text-align: center;
+            padding-top: 8px;
+        }
+        .page{
+            min-width: 50px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div id="wrap">
+    <div id="header">
+        <div style="float: right;padding-top: 24px">
+            2022/12/17&emsp;
+            <a href="../login.html" style="color:#fff;float: right">安全退出</a>
+        </div>
+        <h1>旅游信息管理系统</h1>
+    </div>
+    <div id="header-bar"></div>
+    <div id="content" style="height: 360px">
+        <h2>省份列表</h2>
+        <table>
+            <thead>
+            <tr>
+                <th width="15%">ID</th>
+                <th width="20%">省份</th>
+                <th width="25%">标签</th>
+                <th width="15%">景点个数</th>
+                <th width="25%">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(value, index) in provinces" :key="index">
+                <td>{{value.id}}</td>
+                <td>{{value.name}}</td>
+                <td>{{value.tags}}</td>
+                <td>{{value.count}}</td>
+                <td>
+                    <a href="#" @click="del(value.id)">删除省份</a>
+                    <a href="../viewspot/viewspotlist.html">景点列表</a>
+                    <a href="updateprovince.html">修改省份</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <a href="addprovince.html">
+            <button type="button">添加省份</button>
+        </a>
+        <div id="pages">
+            <a href="#" class="page" @click="pageNow > 1 ? getlist(pageNow-1, pageSize) : getlist(pageNow, pageSize)">&lt;上一页</a>
+            <a v-for="value in totalPage" href="#" class="page" @click="getlist(value, pageSize)">{{value}}</a>
+            <a href="#" class="page" @click="pageNow < totalPage ? getlist(pageNow+1, pageSize) : getlist(pageNow, pageSize)">下一页&gt;</a>
+        </div>
+    </div>
+    <div id="footer">
+        ABC@126.com
+    </div>
+</div>
+</body>
+</html>
+<script src="../js/vue.js"></script>
+<script src="../js/axios.min.js"></script>
+
+<script>
+  new Vue({
+    el: "#wrap",
+    data: {
+      provinces: "",
+      pageSize: "",
+      totalPage: "",
+      pageNow: ""
+    },
+    methods: {
+      getlist(pageNum, pageSize){
+        axios.get('http://localhost:8989/province/list?pageNum=' + pageNum + '&pageSize=' + pageSize)
+            .then(res => {
+              this.provinces = res.data
+              this.pageNow = pageNum
+            })
+      },
+      getTotal(){
+        axios.get('http://localhost:8989/province/getTotal')
+            .then(res => {
+              this.totalPage = res.data % this.pageSize === 0 ? parseInt(res.data / this.pageSize) : parseInt(res.data / this.pageSize + 1)
+              console.log(this.totalPage)
+            })
+      },
+      del(id){
+        axios.get('http://localhost:8989/province/del?id=' + id)
+            .then( () => {
+              alert("删除成功，点击跳转")
+              this.getTotal()
+              this.getlist(1, this.pageSize)
+            }
+        )
+      }
+    },
+    created(){
+      this.pageSize = 4
+      this.getlist(1, this.pageSize)
+      this.getTotal()
+    }
+  })
+</script>

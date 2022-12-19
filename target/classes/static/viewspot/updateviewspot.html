@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        form{
+            width:270px;
+        }
+        input{
+            width: 64%;
+            background: #eee;
+        }
+        input:focus{
+            background: #fff;
+        }
+        form{
+            padding: 0 12px 12px;
+        }
+        label{
+            display: block;
+            padding-bottom:12px;
+        }
+        .label-text{
+            width: 36%;
+            float: left;
+        }
+        #img-show{
+            width: 135px;
+            height: 135px;
+            display: block;
+            margin: 0 auto;
+            object-fit: cover;
+        }
+    </style>
+    <script>
+        function imgfileChange() {
+            var img_show = document.getElementById("img-show");
+            var imgfile = document.getElementById("imgfile");
+
+            var freader = new FileReader();
+            freader.readAsDataURL(imgfile.files[0]);
+            freader.onload = function (e) {
+                img_show.src = e.target.result;
+            };
+        }
+    </script>
+</head>
+<body>
+    <div id="wrap">
+        <div id="header">
+            <div style="float: right;padding-top: 24px">2022/12/18</div>
+            <h1>旅游信息管理系统</h1>
+        </div>
+        <div id="header-bar"></div>
+        <div id="content" style="height: 440px">
+            <img src="../img/timg.jpg" style="float: right;height: 320px">
+            <h2>修改景点</h2>
+            <form>
+                <label>
+                    <div class="label-text">景&emsp;&emsp;点：</div>
+                    <input type="text" name="vname" v-model:value="viewSpot.name">
+                </label>
+                <label>
+                    <div class="label-text">印象图片：</div>
+                    <div style="text-align: center;padding-left: 36%">
+                        <img :src="viewSpot.picpath" alt="" id="img-show">
+                        <input type="file" id="imgfile" style="display: none" ref="img" onchange="imgfileChange()">
+                    </div>
+                </label>
+                <label>
+                    <div class="label-text">旺季时间：</div>
+                    <input type="text" name="hottime" v-model:value="hottime">
+                </label>
+                <label>
+                    <div class="label-text">旺季门票：</div>
+                    <input type="text" name="hotprice" v-model:value="viewSpot.hotticket">
+                </label>
+                <label>
+                    <div class="label-text">淡季门票：</div>
+                    <input type="text" name="normalprice" v-model:value="viewSpot.dimticket">
+                </label>
+                <label>
+                    <div class="label-text">所属省份：</div>
+                    <select name="ofprovince">
+                        <option v-for="province in provinces" v-model:value="province.id" :selected="viewSpot.proviceid==province.id?'selected':''">{{province.name}}</option>
+                    </select>
+                </label>
+                <button type="button" @click="update()">提 交</button>&emsp;
+                <a href="viewspotlist.html">返回</a>
+            </form>
+        </div>
+        <div id="footer">
+            ABC@126.com
+        </div>
+    </div>
+</body>
+</html>
+<script src="../js/vue.js"></script>
+<script src="../js/axios.min.js"></script>
+
+<script>
+new Vue({
+  el: "#wrap",
+  data: {
+    viewSpot: "",
+    hottime: "",
+    provinces: ""
+  },
+  methods: {
+    getViewSpot(id){
+      var that = this
+      axios.get('http://localhost:8989/viewSpot/getOne?id='+id)
+          .then(res => {
+            that.viewSpot = res.data
+            that.hottime = that.viewSpot.hottime.substring(0,10)
+          })
+    },
+    update(){
+      var file = this.$refs.img.files[0]
+      var formdata = new FormData()
+      formdata.append("file", file)
+      formdata.append("id", this.viewSpot.id)
+      formdata.append("name", this.viewSpot.name)
+      formdata.append("hottime", new Date(new Date(this.hottime.replaceAll("-","/")).setHours(8)))
+      formdata.append("hotticket", this.viewSpot.hotticket)
+      formdata.append("dimticket", this.viewSpot.dimticket)
+      formdata.append("introduction", this.viewSpot.introduction)
+      formdata.append("proviceid", this.viewSpot.proviceid)
+
+      axios.post('http://localhost:8989/viewSpot/update', formdata,  {headers:{'Content-Type':'multipart/form-data'}})
+          .then(res => {
+              if(res.data.code === -1){
+                  alert('更新失败, 请重试')
+              }else {
+                  alert('更新成功， 点击确定跳转')
+                  window.location.href='./viewspotlist.html'
+              }
+          })
+    }
+  },
+  created(){
+    var id = location.href.substring(location.href.indexOf('id')+3)
+    this.getViewSpot(id)
+    axios.get('http://localhost:8989/province/getAll')
+        .then(res => {
+          this.provinces = res.data
+        })
+  }
+})
+</script>

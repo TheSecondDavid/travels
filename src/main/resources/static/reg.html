@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        form{
+            width:270px;
+        }
+        input{
+            width: 70%;
+            background: #eee;
+        }
+        input:focus{
+            background: #fff;
+        }
+        form{
+            padding: 0 12px 12px;
+        }
+        label{
+            display: block;
+            padding-bottom:12px;
+        }
+        #img-vcode{
+            width: 56px;
+            height: 21px;
+            float:right;
+            position: relative;
+            top:2px;
+            left:-6px
+        }
+        .label-text{
+            width: 30%;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrap">
+        <div id="header">
+            <div style="float: right;padding-top: 24px">2022/12/17</div>
+            <h1>旅游信息管理系统</h1>
+        </div>
+        <div id="header-bar"></div>
+        <div id="content" style="height: 360px">
+            <img src="img/timg.jpg" style="float: right;height: 320px">
+            <h2>注册</h2>
+            <form>
+                <label>
+                    <div class="label-text">账&emsp;号：</div>
+                    <input type="text" name="username" v-model="username">
+                </label>
+                <label>
+                    <div class="label-text">密&emsp;码：</div>
+                    <input type="password" name="password" v-model="password">
+                </label>
+                <label>
+                    <div class="label-text">邮&emsp;箱：</div>
+                    <input type="text" name="email" v-model="email">
+                </label>
+                <button type="button" @click="register()">提 交</button>&emsp;
+                <a href="login.html">去登录</a>
+            </form>
+        </div>
+        <div id="footer">
+            ABC@126.com
+        </div>
+    </div>
+</body>
+</html>
+<script src="js/axios.min.js"></script>
+<script src="js/vue.js"></script>
+<script>
+  new Vue({
+    el: '#wrap',
+    data: {
+      username: '',
+      password: '',
+      email: ''
+    },
+    methods: {
+      register(){
+        var that = this
+        var param = new FormData()
+        param.append("username", this.username)
+        param.append("password", this.password)
+        param.append("email", this.email)
+        axios.post("http://localhost:8989/index/register", param)
+        .then(res => {
+          if(res.data.code === 0)
+            window.location.href = 'login.html'
+          else
+            alert(res.data.msg)
+        })
+      }
+    }
+  })
+</script>
