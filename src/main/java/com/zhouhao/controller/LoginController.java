@@ -66,4 +66,9 @@ public class LoginController {
 
         return R.ok();
     }
+    @RequestMapping("quit")
+    public R quit(HttpSession session){
+        session.removeAttribute("user");
+        return R.ok();
+    }
 }

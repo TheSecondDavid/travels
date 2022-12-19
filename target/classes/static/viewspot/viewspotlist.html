@@ -46,7 +46,7 @@
     <div id="header">
         <div style="float: right;padding-top: 24px">
             2022/11/18&emsp;
-            <a href="../login.html" style="color:#fff;float: right">安全退出</a>
+            <a href="../login.html" style="color:#fff;float: right" @click="quit()">安全退出</a>
         </div>
         <h1>旅游信息管理系统</h1>
     </div>
@@ -126,6 +126,9 @@
       },
       change(id){
         window.location.href="./updateviewspot.html?id=" + id
+      },
+      quit(){
+        axios.get('http://localhost:8989/index/quit')
       }
     },
     created(){
